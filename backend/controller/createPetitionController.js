@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 export const createPetition = async(req,res)=>{
     try{
     const {title, petition, status, name, mobile, address, department } = req.body;
+    // mobile = String(mobile)
+    
     const result = await prisma.petition.create({
         data:{
             title,
@@ -23,7 +25,7 @@ export const createPetition = async(req,res)=>{
     res.status(201).json({success:"petition created"})
     }
     catch(err){
-        console.log("Server error");
+        console.log("Server error", err);
         res.status(500).json({error:"Server error in petition creating.."});
     }
 }
