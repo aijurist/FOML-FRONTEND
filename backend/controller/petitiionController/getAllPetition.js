@@ -10,7 +10,7 @@ export const getAllPetition = async(req,res) =>{
         res.status(400).json({error:"No petition found"})
     }
     console.log(petition)
-    res.status(200).json({success:"Taken"})
+    res.status(200).json({success:"Taken"},petition);
     }
     catch(err){
     console.log("Server error in getting all petitions");

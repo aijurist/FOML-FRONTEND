@@ -23,7 +23,7 @@ const Signup = () => {
     setLoading(true);
     try{
       const{name , age, email, password} = formData;
-      const response = await axios.post('http://localhost:8000/api/auth/signup',{
+      const response = await axios.post('http://localhost:3000/api/auth/signup',{
         name,
         age,
         email,

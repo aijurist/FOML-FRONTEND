@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom';
 const Home = () => {
   const [showPetitionForm, setShowPetitionForm] = useState(false);
   const [submittedPetition, setSubmittedPetition] = useState(0);
-  const [petition, setpetition] = useState();
+  const [petition, setPetition] = useState();
   const [title,setTitle] = useState();
-  const [mobile,setmobile]= useState();
-  const [name,setname] = useState();
-  const [address, setaddress] = useState()
-  const [status,setstatus] = useState();
+  const [mobile,setMobile]= useState();
+  const [name,setName] = useState();
+  const [address, setAddress] = useState()
+  const [status,setStatus] = useState();
   const [inProgress, setInProgress] = useState(0);
-  const [resolved, setresolved] = useState(0);
+  const [resolved, setResolved] = useState(0);
   const navigate = useNavigate();
 
     const departments = [
@@ -55,28 +55,52 @@ const Home = () => {
       }
     ];
 
-    const handleForm = async (e)=>{
+    const handleForm = async (e) => {
       e.preventDefault();
-      try{
-      const response = await axios.post('http://localhost:8000/api/createPetition',{
-        title,
-        petition,
-        status,
-        name,
-        mobile,
-        address,
-        department:"health",
-      })
-      if(response.status == 201){
-        setstatus("submitted");
-        console.log(create.status);
+      
+      try {
+        const mlResponse = await axios.post('http://localhost:8000/analyze', {
+          petition_text: petition,
+          additional_context: title,
+        });
+    
+        console.log(mlResponse.data);
+    
+        if (mlResponse.data.success === true) {
+          try {
+            setStatus("submitted");
+            const response = await axios.post('http://localhost:3000/api/createPetition', {
+              title,
+              status,
+              name,
+              mobile,
+              address,
+              department: "health",
+              petition,
+            });
+    
+            if (response.status === 201) {
+              setShowPetitionForm(false);
+              setTitle("");
+              setMobile("");
+              setPetition("");
+              setAddress("");
+              setName("");
+              setSubmittedPetition(submittedPetition + 1);
+            } else {
+              console.log("Petition not created");
+            }
+          } catch (err) {
+            console.log("Error submitting petition:", err);
+          }
+        } else {
+          console.log("ML response did not return success");
+        }
+      } catch (err) {
+        console.log("Error analyzing petition:", err);
       }
-    }
-    catch(err){
-      console.log("Error in submitting the petition");
-    }
-    }
-  return (
+    };
+      return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-blue-800 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
@@ -134,7 +158,6 @@ const Home = () => {
                 <h3 className="text-center text-xl font-bold">Submit Your Petition</h3>
                 <button 
                   onClick={() =>{
-                    setSubmittedPetition(submittedPetition+1);
                      setShowPetitionForm(false);
                     }}
                   className="text-gray-500 hover:text-gray-700"
@@ -158,7 +181,7 @@ const Home = () => {
                   <label className="block text-gray-700 mb-2">Your Petition</label>
                     <textarea 
                       value={petition}
-                      className="w-full p-4 h-64 border border-gray-300 rounded-lg bg-transparent resize-none" onChange={(e)=>{setpetition(e.target.value)}}
+                      className="w-full p-4 h-64 border border-gray-300 rounded-lg bg-transparent resize-none" onChange={(e)=>{setPetition(e.target.value)}}
                       placeholder="Write your petition here..."
                     />
                 </div>
@@ -171,7 +194,7 @@ const Home = () => {
                       type="text" 
                       value={ name }
                       className="p-2 w-full border border-gray-300 rounded"
-                      onChange={(e)=>{setname(e.target.value)}} 
+                      onChange={(e)=>{setName(e.target.value)}} 
                       placeholder="Full Name of Petitioner"
                     />
                     </div>
@@ -181,7 +204,7 @@ const Home = () => {
                     type="text"
                     value={mobile}
                     className="p-2 w-full border border-gray-300 rounded"
-                    onChange={(e)=>{setmobile(e.target.value)}}
+                    onChange={(e)=>{setMobile(e.target.value)}}
                     placeholder="Mobile Number"
                     />
                     </div>
@@ -191,7 +214,7 @@ const Home = () => {
                       type="text" 
                       value={address}
                       className="p-2 w-full h-25 border border-gray-300 rounded"
-                      onChange={(e)=>{setaddress(e.target.value)}} 
+                      onChange={(e)=>{setAddress(e.target.value)}} 
                       placeholder="Address"
                     />
                     </div>
@@ -209,11 +232,11 @@ const Home = () => {
                 <div className="flex justify-end">
                   <button 
                     onClick={() => setShowPetitionForm(false)}
-                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                    className="bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-800 font-bold py-2 px-4 rounded mr-2"
                   >
                     Cancel
                   </button>
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={handleForm}>
+                  <button className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-bold py-2 px-4 rounded" onClick={handleForm}>
                     Submit Petition
                   </button>
                 </div>
