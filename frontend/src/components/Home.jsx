@@ -11,7 +11,7 @@ const Home = () => {
   const [mobile,setMobile]= useState();
   const [name,setName] = useState();
   const [address, setAddress] = useState()
-  const [status,setStatus] = useState();
+  const [status,setStatus] = useState("submitted");
   const [inProgress, setInProgress] = useState(0);
   const [resolved, setResolved] = useState(0);
   const navigate = useNavigate();
@@ -68,7 +68,6 @@ const Home = () => {
     
         if (mlResponse.data.success === true) {
           try {
-            setStatus("submitted");
             const response = await axios.post('http://localhost:3000/api/createPetition', {
               title,
               status,
